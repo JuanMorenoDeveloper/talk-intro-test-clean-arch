@@ -1,0 +1,14 @@
+== !
+
+* Fuentes:
+
+** link:{https://webcourse.cs.technion.ac.il/236700/Spring2018/ho.html}[236700 - Software Design, Spring2018 - Course Material]
+** link:{https://refactoring.com}[Refactoring]
+** link:{http://www.javiergarzas.com/2015/09/dummies-vs-stubs-vs-mocks-vs-spies-vs-fakes.html}[Javier Garzas - Dependencias en pruebas unitarias]
+** link:{https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html}[Robert C. Martin - The Clean Architecture]
+
+
+[NOTE.speaker]
+====
+Para generar pdf incluir al final de la presentación lo siguiente: ?showNotes=separate-page&print-pdf
+====
