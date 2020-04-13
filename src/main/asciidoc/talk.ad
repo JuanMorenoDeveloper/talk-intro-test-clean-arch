@@ -1,11 +1,13 @@
-= Introducción a Unit Test & Clean Architecture
 :icons: font
 :twitter-tag: UDE
 :conference-tag:
 :talk-tag: Intro Test&Clean
 :linkattrs:
+ifndef::partials[:partials: partials]
 
-include::footer.ad[]
+include::{partials}/footer.ad[]
+
+== Introducción a SOLID, Unit Test & Clean Architecture
 
 [NOTE.speaker]
 ====
@@ -425,4 +427,4 @@ Recomendación: crear un proyecto con todo esto definido y que sea la base de fu
 
 * Código testeable. No hay código acoplado que no permita falsear ciertos datos para comprobar distintos comportamientos.
 
-include::self.ad[]
+include::{partials}/self.ad[]
