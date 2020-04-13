@@ -14,23 +14,54 @@ include::{partials}/footer.ad[]
 Contenido de la presentación:
 
 *	Secciones teóricas:
+** Conceptos de SOLID
 **	Fundamentos. ¿Por qué usar test unitarios? Refactoring. Buenas prácticas. Niveles de test/Requisitos, Code coverage.
 **	Testing doubles. Manejo de dependencias. Dummies, Stubs, Fakes, Spies, Mocks. Prácticas recomendadas.
 *	TDD. Prácticas para mejorar los test. Red-Green-Refactor cycle. Ventajas y Desventajas.
 *	Secciones prácticas:
 **	Herramientas. JUnit – Annotations / Lifecycle. Prácticas. Mockito/Powermock. Hamcrest/Assertj.
 **	TDD Kata.
+** Arquitectura Clean
 
 ====
 //== !
 //image::pattern-design-4pwbdv1y.jpg[background, size=auto]
 // Fuente: https://standaserigraf.wordpress.com/2015/09/30/pattern-design-tecnica-artistica-que-se-ocupa-de-la-creacion-de-patrones-graficos/
+== Principios SOLID
+* Single responsibility
+* Open closed
+* Liskov substitution
+* Interface segregation
+* Dependency injection
 
-== Contenido
-* Fundamentos
-* Testing doubles
-* TDD
-* Herramientas
+== Principio de Responsabilidad Única
+
+*Un objeto debe realizar una única cosa*.
+
+[NOTE.speaker]
+====
+Es muy habitual, si no prestamos atención a esto, que acabemos
+teniendo clases que tienen varias responsabilidades lógicas a la vez.
+====
+
+== Principio Open/Closed
+
+*Una entidad de software debería estar abierta a extensión pero cerrada a modificación*.
+
+== Principio de Sustitución de Liskov
+
+*Si en alguna parte de nuestro código estamos usando una clase, y esta clase es extendida, tenemos que poder utilizar cualquiera de las clases hijas y que el programa siga siendo válido.*
+
+== Principio de segregación de interfaces
+
+*Ninguna clase debería depender de métodos que no usa.*
+
+== Principio de inversión de dependencias
+
+* *Las clases de alto nivel no deberían depender de las clases de bajo nivel*. Ambas deberían depender de las abstracciones.
+* *Las abstracciones no deberían depender de los detalles*. Los detalles deberían depender de las abstracciones.
+
+== Testing
 
 == ¿Por qué escribimos tests? icon:lightbulb[]
 
