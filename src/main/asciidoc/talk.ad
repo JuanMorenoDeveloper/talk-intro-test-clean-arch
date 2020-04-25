@@ -9,21 +9,6 @@ include::{partials}/footer.ad[]
 
 == Introducción a SOLID, Unit Test & Clean Architecture
 
-[NOTE.speaker]
-====
-Contenido de la presentación:
-
-*	Secciones teóricas:
-** Conceptos de SOLID
-**	Fundamentos. ¿Por qué usar test unitarios? Refactoring. Buenas prácticas. Niveles de test/Requisitos, Code coverage.
-**	Testing doubles. Manejo de dependencias. Dummies, Stubs, Fakes, Spies, Mocks. Prácticas recomendadas.
-*	TDD. Prácticas para mejorar los test. Red-Green-Refactor cycle. Ventajas y Desventajas.
-*	Secciones prácticas:
-**	Herramientas. JUnit – Annotations / Lifecycle. Prácticas. Mockito/Powermock. Hamcrest/Assertj.
-**	TDD Kata.
-** Arquitectura Clean
-
-====
 //== !
 //image::pattern-design-4pwbdv1y.jpg[background, size=auto]
 // Fuente: https://standaserigraf.wordpress.com/2015/09/30/pattern-design-tecnica-artistica-que-se-ocupa-de-la-creacion-de-patrones-graficos/
@@ -42,24 +27,341 @@ Contenido de la presentación:
 ====
 Es muy habitual, si no prestamos atención a esto, que acabemos
 teniendo clases que tienen varias responsabilidades lógicas a la vez.
+
 ====
+
+== ¿Cómo detectar si estamos violando el Principio de Responsabilidad Única?
+
+== !
+* En una misma clase están involucradas dos capas de la arquitectura
+* El número de métodos públicos
+* Los métodos que usan cada uno de los campos de esa clase
+* Por el número de imports
+
+== !
+* Nos cuesta testear la clase
+* Cada vez que escribes una nueva funcionalidad, esa clase se ve afectada
+* Por el número de líneas
+
+== Ejemplo
+
+[source,kotlin]
+----
+class Vehicle {
+  private val wheelCount = 4
+  private val maxSpeed = 200
+  override fun toString():String {
+    return "wheelCount=$wheelCount, maxSpeed=$maxSpeed"
+  }
+  fun print() {
+    println(toString())
+  }
+}
+----
+
+== ¿Qué problema tiene esta clase?
+
+== !
+
+* Mezcla de lógica con presentación
+
+== ¿Cómo arreglarlo?
+
+== !
+[source,kotlin]
+----
+class VehiclePrinter {
+  fun print(vehicle:Vehicle) {
+    println(vehicle)
+  }
+}
+----
 
 == Principio Open/Closed
 
 *Una entidad de software debería estar abierta a extensión pero cerrada a modificación*.
 
+== ¿Cómo detectar que estamos violando el principio Open/Closed?
+
+== !
+* Clases que modificamos más seguido (hits of code)
+
+== Ejemplo
+
+== !
+
+[source,kotlin]
+----
+class Vehicle {
+  //…
+  val type:VehicleType
+  //…
+}
+enum class VehicleType {
+  CAR,
+  MOTORBIKE;
+}
+fun draw(vehicle:Vehicle) {
+    when (vehicle.type) {
+      CAR -> drawCar(vehicle)
+      MOTORBIKE -> drawMotorbike(vehicle)
+    }
+}
+----
+
+== ¿Qué podemos hacer para evitar tener que estar modificando el método `draw`?
+
+== Polimorfismo
+
+== !
+[source,kotlin]
+----
+abstract class Vehicle {
+  //…
+  abstract fun draw()
+}
+class Car:Vehicle() {
+  override fun draw() {
+    // Draw the car
+  }
+}
+class Motorbike:Vehicle() {
+  override fun draw() {
+    // Draw the motorbike
+  }
+}
+----
+
+== !
+[source,kotlin]
+----
+fun draw(vehicle:Vehicle) {
+  vehicle.draw()
+}
+class Truck:Vehicle() {
+  override fun draw() {
+    // Draw the truck
+  }
+}
+----
+
+== ¿Cuándo debemos cumplir con este principio?
+
+* Depende, debe aplicarse cuando es necesario. La complejidad no siempre compensa.
+* Un caso práctico es cuando hay partes de nuestro código que cambien mucho.
+
 == Principio de Sustitución de Liskov
 
 *Si en alguna parte de nuestro código estamos usando una clase, y esta clase es extendida, tenemos que poder utilizar cualquiera de las clases hijas y que el programa siga siendo válido.*
+
+== ¿Cómo detectar que estamos violando el principio de sustitución de Liskov?
+* Si un método sobrescrito no hace nada o lanza una excepción.
+
+== Ejemplo
+
+== !
+[source,kotlin]
+----
+open class Rectangle {
+  open var width:Int = 0
+  open var height:Int = 0
+  open fun calculateArea():Int {
+    return width * height
+  }
+}
+@Test
+fun givenRectangle_whenCalculateArea_thenCorrectResult() {
+  val r = Rectangle()
+  r.width = 5
+  r.height = 4
+
+  val result = r.calculateArea()
+
+  assertEquals(20, result)
+}
+----
+
+== !
+[source,kotlin]
+----
+class Square:Rectangle() {
+  override var width:Int
+  get() {
+    return super.width
+  }
+  set(width) {
+    super.width = width
+    super.height = width
+  }
+  override var height:Int
+  get() {
+    return super.height
+  }
+  set(height) {
+    super.height = height
+    super.width = height
+  }
+}
+----
+
+== ¿Qué pasará si en el test cambiamos el rectángulo por un cuadrado?
+
+== 16!=20
+
+== ¿Qué podemos hacer?
+* Usar interfaces, normalmente pequeñas.
+* Inmutabilidad (Una vez que se ha creado un objeto, el estado del mismo no puede volver a modificarse)
+
+== !
+[source,kotlin]
+----
+interface IRectangle {
+  fun calculateArea():Int
+}
+class Rectangle:IRectangle//…
+class Square:IRectangle//…
+----
+
+== !
+[source,kotlin]
+----
+class Rectangle(private val width:Int, private val height:Int)
+class Square(private val side:Int):Rectangle(side, side)
+----
 
 == Principio de segregación de interfaces
 
 *Ninguna clase debería depender de métodos que no usa.*
 
+== ¿Cómo detectar que estamos violando el Principio de segregación de interfaces?
+
+* Al implementar una interfaz ves que uno o varios de los métodos no tienen sentido y te hace falta dejarlos vacíos o
+lanzar excepciones
+
+== Ejemplo
+[source,kotlin]
+----
+interface Product {
+  fun name():String
+  fun stock():Int
+  fun numberOfDisks():Int
+  fun releaseDate():Date
+}
+class CD:Product//…
+----
+
+== !
+[source,kotlin]
+----
+interface Product {
+  //…
+  fun recommendedAge():Int
+}
+class CD:Product {
+  //…
+  override fun recommendedAge():Int {
+    throw UnsupportedOperationException()
+  }
+}
+----
+
+== ¿Qué podemos hacer?
+
+== !
+[source,kotlin]
+----
+interface AgeAware {
+  fun recommendedAge():Int
+}
+class CD:Product//…
+class DVD:Product, AgeAware {
+  fun checkUserCanBuy(user:User, ageAware:AgeAware):Boolean {
+    return user.age >= ageAware.recommendedAge()
+  }
+  //…
+}
+----
+
+== ¿Qué hacer con código antiguo?
+* Usar el patrón adapter
+
 == Principio de inversión de dependencias
 
 * *Las clases de alto nivel no deberían depender de las clases de bajo nivel*. Ambas deberían depender de las abstracciones.
 * *Las abstracciones no deberían depender de los detalles*. Los detalles deberían depender de las abstracciones.
+
+== ¿Cómo detectar que estamos violando el Principio de inversión de dependencias?
+* Cualquier instanciación de clases complejas o módulos es una
+violación de este principio.
+
+== Ejemplo
+
+== !
+[source,kotlin]
+----
+class ShoppingBasket {
+  fun buy(shopping:Shopping) {
+    val db = SqlDatabase()
+    db.save(shopping)
+    val creditCard = CreditCard()
+    creditCard.pay(shopping)
+  }
+}
+class SqlDatabase {
+  fun save(shopping:Shopping) {
+    // Saves data in SQL database
+  }
+}
+class CreditCard {
+  fun pay(shopping:Shopping) {
+    // Performs payment using a credit card
+  }
+}
+----
+
+== ¿Cómo lo solucionamos?
+[source,kotlin]
+----
+interface Persistence {
+  fun save(shopping:Shopping)
+}
+class SqlDatabase:Persistence {
+  override fun save(shopping:Shopping) {
+    // Saves data in SQL database
+  }
+}
+interface PaymentMethod {
+  fun pay(shopping:Shopping)
+}
+class CreditCard:PaymentMethod {
+  override fun pay(shopping:Shopping) {
+    // Performs payment using a credit card
+  }
+}
+----
+
+== Ahora inyectamos las dependencias
+
+== !
+[source,kotlin]
+----
+class ShoppingBasket(private val persistence:Persistence, private val paymentMethod:PaymentMethod) {
+  fun buy(shopping:Shopping) {
+    persistence.save(shopping)
+    paymentMethod.pay(shopping)
+  }
+}
+class Server:Persistence {
+  override fun save(shopping:Shopping) {
+    // Saves data in a server
+  }
+}
+class Paypal:PaymentMethod {
+  override fun pay(shopping:Shopping) {
+    // Performs payment using Paypal account
+  }
+}
+----
 
 == Testing
 
@@ -199,7 +501,7 @@ Normalmente no se debe cambiar un test si la implementación cambia, solo se hac
 3. Assert (Afirmación)
 
 == !
-[source, java]
+[source, kotlin]
 ----
 @Test
 fun givenString_whenReverse_thenGetReverseString() {
@@ -429,6 +731,15 @@ image::regla-de-dependencia.png[background, size=auto]
 * Requisitos: minimizar al máximo las incidencias. Desarrollar test.
 
 * Posibilidad de incluir desarrolladores que no conozcan los frameworks (Android, Angular...)
+
+== Conclusiones SOLID
+* SRP implica que sólo debería haber un motivo por el que modificar una clase.
+* Tener código cerrado a modificación y abierto a extensión nos da la máxima flexibilidad con el mínimo impacto.
+* El principio de Liskov nos ayuda a utilizar la herencia de forma correcta
+
+== Conclusiones SOLID
+* El principio de segregación de interfaces nos ayuda a no obligar a ninguna clase a implementar métodos que no utiliza.
+
 
 == Conclusiones Testing
 * El uso de test agrega calidad a los sistemas

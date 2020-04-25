@@ -27,16 +27,211 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script><!--[if 
     <span class="element"></span>
     <span class="element">Intro Test&amp;Clean</span>
 </div>
-<section id="_introducción_a_solid_unit_test_clean_architecture"><h2>Introducción a SOLID, Unit Test &amp; Clean Architecture</h2><aside class="notes"><div class="paragraph"><p>Contenido de la presentación:</p></div>
-<div class="ulist"><ul><li><p>Secciones teóricas:</p><div class="ulist"><ul><li><p>Conceptos de SOLID</p></li><li><p>Fundamentos. ¿Por qué usar test unitarios? Refactoring. Buenas prácticas. Niveles de test/Requisitos, Code coverage.</p></li><li><p>Testing doubles. Manejo de dependencias. Dummies, Stubs, Fakes, Spies, Mocks. Prácticas recomendadas.</p></li></ul></div></li><li><p>TDD. Prácticas para mejorar los test. Red-Green-Refactor cycle. Ventajas y Desventajas.</p></li><li><p>Secciones prácticas:</p><div class="ulist"><ul><li><p>Herramientas. JUnit – Annotations / Lifecycle. Prácticas. Mockito/Powermock. Hamcrest/Assertj.</p></li><li><p>TDD Kata.</p></li><li><p>Arquitectura Clean</p></li></ul></div></li></ul></div></aside></section>
+<section id="_introducción_a_solid_unit_test_clean_architecture"><h2>Introducción a SOLID, Unit Test &amp; Clean Architecture</h2></section>
 <section id="_principios_solid"><h2>Principios SOLID</h2><div class="ulist"><ul><li><p>Single responsibility</p></li><li><p>Open closed</p></li><li><p>Liskov substitution</p></li><li><p>Interface segregation</p></li><li><p>Dependency injection</p></li></ul></div></section>
 <section id="_principio_de_responsabilidad_única"><h2>Principio de Responsabilidad Única</h2><div class="paragraph"><p><strong>Un objeto debe realizar una única cosa</strong>.</p></div>
 <aside class="notes"><div class="paragraph"><p>Es muy habitual, si no prestamos atención a esto, que acabemos
 teniendo clases que tienen varias responsabilidades lógicas a la vez.</p></div></aside></section>
+<section id="_cómo_detectar_si_estamos_violando_el_principio_de_responsabilidad_única"><h2>¿Cómo detectar si estamos violando el Principio de Responsabilidad Única?</h2></section>
+<section><div class="ulist"><ul><li><p>En una misma clase están involucradas dos capas de la arquitectura</p></li><li><p>El número de métodos públicos</p></li><li><p>Los métodos que usan cada uno de los campos de esa clase</p></li><li><p>Por el número de imports</p></li></ul></div></section>
+<section><div class="ulist"><ul><li><p>Nos cuesta testear la clase</p></li><li><p>Cada vez que escribes una nueva funcionalidad, esa clase se ve afectada</p></li><li><p>Por el número de líneas</p></li></ul></div></section>
+<section id="_ejemplo"><h2>Ejemplo</h2><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">class Vehicle {
+  private val wheelCount = 4
+  private val maxSpeed = 200
+  override fun toString():String {
+    return "wheelCount=$wheelCount, maxSpeed=$maxSpeed"
+  }
+  fun print() {
+    println(toString())
+  }
+}</code></pre></section>
+<section id="_qué_problema_tiene_esta_clase"><h2>¿Qué problema tiene esta clase?</h2></section>
+<section><div class="ulist"><ul><li><p>Mezcla de lógica con presentación</p></li></ul></div></section>
+<section id="_cómo_arreglarlo"><h2>¿Cómo arreglarlo?</h2></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">class VehiclePrinter {
+  fun print(vehicle:Vehicle) {
+    println(vehicle)
+  }
+}</code></pre></section>
 <section id="_principio_openclosed"><h2>Principio Open/Closed</h2><div class="paragraph"><p><strong>Una entidad de software debería estar abierta a extensión pero cerrada a modificación</strong>.</p></div></section>
+<section id="_cómo_detectar_que_estamos_violando_el_principio_openclosed"><h2>¿Cómo detectar que estamos violando el principio Open/Closed?</h2></section>
+<section><div class="ulist"><ul><li><p>Clases que modificamos más seguido (hits of code)</p></li></ul></div></section>
+<section id="_ejemplo_2"><h2>Ejemplo</h2></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">class Vehicle {
+  //…
+  val type:VehicleType
+  //…
+}
+enum class VehicleType {
+  CAR,
+  MOTORBIKE;
+}
+fun draw(vehicle:Vehicle) {
+    when (vehicle.type) {
+      CAR -&gt; drawCar(vehicle)
+      MOTORBIKE -&gt; drawMotorbike(vehicle)
+    }
+}</code></pre></section>
+<section id="_qué_podemos_hacer_para_evitar_tener_que_estar_modificando_el_método_draw"><h2>¿Qué podemos hacer para evitar tener que estar modificando el método <code>draw</code>?</h2></section>
+<section id="_polimorfismo"><h2>Polimorfismo</h2></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">abstract class Vehicle {
+  //…
+  abstract fun draw()
+}
+class Car:Vehicle() {
+  override fun draw() {
+    // Draw the car
+  }
+}
+class Motorbike:Vehicle() {
+  override fun draw() {
+    // Draw the motorbike
+  }
+}</code></pre></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">fun draw(vehicle:Vehicle) {
+  vehicle.draw()
+}
+class Truck:Vehicle() {
+  override fun draw() {
+    // Draw the truck
+  }
+}</code></pre></section>
+<section id="_cuándo_debemos_cumplir_con_este_principio"><h2>¿Cuándo debemos cumplir con este principio?</h2><div class="ulist"><ul><li><p>Depende, debe aplicarse cuando es necesario. La complejidad no siempre compensa.</p></li><li><p>Un caso práctico es cuando hay partes de nuestro código que cambien mucho.</p></li></ul></div></section>
 <section id="_principio_de_sustitución_de_liskov"><h2>Principio de Sustitución de Liskov</h2><div class="paragraph"><p><strong>Si en alguna parte de nuestro código estamos usando una clase, y esta clase es extendida, tenemos que poder utilizar cualquiera de las clases hijas y que el programa siga siendo válido.</strong></p></div></section>
+<section id="_cómo_detectar_que_estamos_violando_el_principio_de_sustitución_de_liskov"><h2>¿Cómo detectar que estamos violando el principio de sustitución de Liskov?</h2><div class="ulist"><ul><li><p>Si un método sobrescrito no hace nada o lanza una excepción.</p></li></ul></div></section>
+<section id="_ejemplo_3"><h2>Ejemplo</h2></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">open class Rectangle {
+  open var width:Int = 0
+  open var height:Int = 0
+  open fun calculateArea():Int {
+    return width * height
+  }
+}
+@Test
+fun givenRectangle_whenCalculateArea_thenCorrectResult() {
+  val r = Rectangle()
+  r.width = 5
+  r.height = 4
+
+  val result = r.calculateArea()
+
+  assertEquals(20, result)
+}</code></pre></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">class Square:Rectangle() {
+  override var width:Int
+  get() {
+    return super.width
+  }
+  set(width) {
+    super.width = width
+    super.height = width
+  }
+  override var height:Int
+  get() {
+    return super.height
+  }
+  set(height) {
+    super.height = height
+    super.width = height
+  }
+}</code></pre></section>
+<section id="_qué_pasará_si_en_el_test_cambiamos_el_rectángulo_por_un_cuadrado"><h2>¿Qué pasará si en el test cambiamos el rectángulo por un cuadrado?</h2></section>
+<section id="_1620"><h2>16!=20</h2></section>
+<section id="_qué_podemos_hacer"><h2>¿Qué podemos hacer?</h2><div class="ulist"><ul><li><p>Usar interfaces, normalmente pequeñas.</p></li><li><p>Inmutabilidad (Una vez que se ha creado un objeto, el estado del mismo no puede volver a modificarse)</p></li></ul></div></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">interface IRectangle {
+  fun calculateArea():Int
+}
+class Rectangle:IRectangle//…
+class Square:IRectangle//…</code></pre></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">class Rectangle(private val width:Int, private val height:Int)
+class Square(private val side:Int):Rectangle(side, side)</code></pre></section>
 <section id="_principio_de_segregación_de_interfaces"><h2>Principio de segregación de interfaces</h2><div class="paragraph"><p><strong>Ninguna clase debería depender de métodos que no usa.</strong></p></div></section>
+<section id="_cómo_detectar_que_estamos_violando_el_principio_de_segregación_de_interfaces"><h2>¿Cómo detectar que estamos violando el Principio de segregación de interfaces?</h2><div class="ulist"><ul><li><p>Al implementar una interfaz ves que uno o varios de los métodos no tienen sentido y te hace falta dejarlos vacíos o
+lanzar excepciones</p></li></ul></div></section>
+<section id="_ejemplo_4"><h2>Ejemplo</h2><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">interface Product {
+  fun name():String
+  fun stock():Int
+  fun numberOfDisks():Int
+  fun releaseDate():Date
+}
+class CD:Product//…</code></pre></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">interface Product {
+  //…
+  fun recommendedAge():Int
+}
+class CD:Product {
+  //…
+  override fun recommendedAge():Int {
+    throw UnsupportedOperationException()
+  }
+}</code></pre></section>
+<section id="_qué_podemos_hacer_2"><h2>¿Qué podemos hacer?</h2></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">interface AgeAware {
+  fun recommendedAge():Int
+}
+class CD:Product//…
+class DVD:Product, AgeAware {
+  fun checkUserCanBuy(user:User, ageAware:AgeAware):Boolean {
+    return user.age &gt;= ageAware.recommendedAge()
+  }
+  //…
+}</code></pre></section>
+<section id="_qué_hacer_con_código_antiguo"><h2>¿Qué hacer con código antiguo?</h2><div class="ulist"><ul><li><p>Usar el patrón adapter</p></li></ul></div></section>
 <section id="_principio_de_inversión_de_dependencias"><h2>Principio de inversión de dependencias</h2><div class="ulist"><ul><li><p><strong>Las clases de alto nivel no deberían depender de las clases de bajo nivel</strong>. Ambas deberían depender de las abstracciones.</p></li><li><p><strong>Las abstracciones no deberían depender de los detalles</strong>. Los detalles deberían depender de las abstracciones.</p></li></ul></div></section>
+<section id="_cómo_detectar_que_estamos_violando_el_principio_de_inversión_de_dependencias"><h2>¿Cómo detectar que estamos violando el Principio de inversión de dependencias?</h2><div class="ulist"><ul><li><p>Cualquier instanciación de clases complejas o módulos es una
+violación de este principio.</p></li></ul></div></section>
+<section id="_ejemplo_5"><h2>Ejemplo</h2></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">class ShoppingBasket {
+  fun buy(shopping:Shopping) {
+    val db = SqlDatabase()
+    db.save(shopping)
+    val creditCard = CreditCard()
+    creditCard.pay(shopping)
+  }
+}
+class SqlDatabase {
+  fun save(shopping:Shopping) {
+    // Saves data in SQL database
+  }
+}
+class CreditCard {
+  fun pay(shopping:Shopping) {
+    // Performs payment using a credit card
+  }
+}</code></pre></section>
+<section id="_cómo_lo_solucionamos"><h2>¿Cómo lo solucionamos?</h2><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">interface Persistence {
+  fun save(shopping:Shopping)
+}
+class SqlDatabase:Persistence {
+  override fun save(shopping:Shopping) {
+    // Saves data in SQL database
+  }
+}
+interface PaymentMethod {
+  fun pay(shopping:Shopping)
+}
+class CreditCard:PaymentMethod {
+  override fun pay(shopping:Shopping) {
+    // Performs payment using a credit card
+  }
+}</code></pre></section>
+<section id="_ahora_inyectamos_las_dependencias"><h2>Ahora inyectamos las dependencias</h2></section>
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">class ShoppingBasket(private val persistence:Persistence, private val paymentMethod:PaymentMethod) {
+  fun buy(shopping:Shopping) {
+    persistence.save(shopping)
+    paymentMethod.pay(shopping)
+  }
+}
+class Server:Persistence {
+  override fun save(shopping:Shopping) {
+    // Saves data in a server
+  }
+}
+class Paypal:PaymentMethod {
+  override fun pay(shopping:Shopping) {
+    // Performs payment using Paypal account
+  }
+}</code></pre></section>
 <section id="_testing"><h2>Testing</h2></section>
 <section id="_por_qué_escribimos_tests"><h2>¿Por qué escribimos tests? <span class="icon"><i class="fa fa-lightbulb"></i></span></h2></section>
 <section id="_por_qué_escribimos_tests_2"><h2>¿Por qué escribimos tests?</h2><div class="ulist"><ul><li><p>Para asegurarnos que el código funciona</p></li><li><p>&#8230;&#8203; pero escribir test automatizados es mucho más trabajo que simplemente escribir el <code>main</code> y validar entradas y salidas &#8230;&#8203;</p></li></ul></div></section>
@@ -74,7 +269,7 @@ Normalmente no se debe cambiar un test si la implementación cambia, solo se hac
   Se debe evitar escribir test que simplemente repitan el código de producción. El objetivo de los test es facilitar el refactor.
   Preferir en lo posible test de caja negra que de caja blanca.</p><div class="ulist"><ul><li><p>Caja negra: Se prueba la funcionalidad sin conocer su implementación.</p></li><li><p>Caja blanca: Se prueba conociendo los detalles de la implementación.</p></li></ul></div></li></ul></div></aside></section>
 <section id="_estructura_de_un_test"><h2>Estructura de un test</h2><div class="olist arabic"><ol class="arabic"><li><p>Arrange (Planificación)</p></li><li><p>Act (Acción)</p></li><li><p>Assert (Afirmación)</p></li></ol></div></section>
-<section><pre class="highlight listingblock"><code data-noescape class="java language-java">@Test
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">@Test
 fun givenString_whenReverse_thenGetReverseString() {
   val input = "abc" <i class="conum" data-value="1"></i><b>(1)</b>
 
@@ -133,11 +328,13 @@ necesario configurar qué comportamiento esperas cuando alguien llame a alguno d
 <section id="_regla_de_dependencia" data-background-image="./images/regla-de-dependencia.png" data-background-size="auto"><h2>Regla de Dependencia</h2></section>
 <section id="_regla_de_dependencia_2"><h2>Regla de Dependencia</h2><div class="ulist"><ul><li><p>Las dependencias a nivel de código fuente sólo pueden apuntar hacia dentro.</p></li><li><p>Una capa interna no puede usar elementos de una capa externa.</p></li></ul></div></section>
 <section id="_por_qué_la_arquitectura_clean"><h2>¿Por qué la Arquitectura Clean?</h2><div class="ulist"><ul><li><p>Evolución constante de la aplicación con nuevas funcionalidades.</p></li><li><p>Desarrollo paralelo con los servicios web.</p></li><li><p>Requisitos: minimizar al máximo las incidencias. Desarrollar test.</p></li><li><p>Posibilidad de incluir desarrolladores que no conozcan los frameworks (Android, Angular&#8230;&#8203;)</p></li></ul></div></section>
+<section id="_conclusiones_solid"><h2>Conclusiones SOLID</h2><div class="ulist"><ul><li><p>SRP implica que sólo debería haber un motivo por el que modificar una clase.</p></li><li><p>Tener código cerrado a modificación y abierto a extensión nos da la máxima flexibilidad con el mínimo impacto.</p></li><li><p>El principio de Liskov nos ayuda a utilizar la herencia de forma correcta</p></li></ul></div></section>
+<section id="_conclusiones_solid_2"><h2>Conclusiones SOLID</h2><div class="ulist"><ul><li><p>El principio de segregación de interfaces nos ayuda a no obligar a ninguna clase a implementar métodos que no utiliza.</p></li></ul></div></section>
 <section id="_conclusiones_testing"><h2>Conclusiones Testing</h2><div class="ulist"><ul><li><p>El uso de test agrega calidad a los sistemas</p></li><li><p>Permiten hacer refactor con confianza</p></li><li><p>Deben ser independientes a nivel de datos</p></li><li><p>Mejora el diseño</p></li><li><p>Existen variedad de estrategias y herramientas para implementarlos</p></li></ul></div></section>
 <section id="_conclusiones_arquitectura_clean"><h2>Conclusiones Arquitectura clean</h2><div class="ulist"><ul><li><p>La definición de la arquitectura, integración con librerías, inyección de dependencias, etc. hace que el inicio sea lento.</p></li><li><p>Al estar las funcionalidades distribuidas por capas, se crea la sensación de no encontrar el código o de estar perdido.</p></li><li><p>El trabajar con capas te aísla de problemas que afectan a otras capas.</p></li></ul></div>
 <aside class="notes"><div class="paragraph"><p>Recomendación: crear un proyecto con todo esto definido y que sea la base de futuros proyectos.</p></div></aside></section>
 <section id="_conclusiones_arquitectura_clean_2"><h2>Conclusiones Arquitectura Clean</h2><div class="ulist"><ul><li><p>El trabajar con abstracciones permite que el proyecto sea más flexible ante cambios.</p></li><li><p>Reutilización de código. Toda la lógica está centrada en la capa de dominio que es accesible desde cualquier otra capa.</p></li><li><p>Código testeable. No hay código acoplado que no permita falsear ciertos datos para comprobar distintos comportamientos.</p></li></ul></div></section>
-<section><div class="ulist"><ul><li><p>Fuentes:</p><div class="ulist"><ul><li><p><a href="{https://webcourse.cs.technion.ac.il/236700/Spring2018/ho.html}">236700 - Software Design, Spring2018 - Course Material</a></p></li><li><p><a href="{https://refactoring.com}">Refactoring</a></p></li><li><p><a href="{http://www.javiergarzas.com/2015/09/dummies-vs-stubs-vs-mocks-vs-spies-vs-fakes.html}">Javier Garzas - Dependencias en pruebas unitarias</a></p></li><li><p><a href="{https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html}">Robert C. Martin - The Clean Architecture</a></p></li></ul></div></li></ul></div>
+<section><div class="ulist"><ul><li><p>Fuentes:</p><div class="ulist"><ul><li><p><a href="https://webcourse.cs.technion.ac.il/236700/Spring2018/ho.html">236700 - Software Design, Spring2018 - Course Material</a></p></li><li><p><a href="https://refactoring.com">Refactoring</a></p></li><li><p><a href="https://www.javiergarzas.com/2015/09/dummies-vs-stubs-vs-mocks-vs-spies-vs-fakes.html">Javier Garzas - Dependencias en pruebas unitarias</a></p></li><li><p><a href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html">Robert C. Martin - The Clean Architecture</a></p></li><li><p><a href="https://devexperto.com/principio-responsabilidad-unica/">Pricipios SOLID - DevExperto</a></p></li></ul></div></li></ul></div>
 <aside class="notes"><div class="paragraph"><p>Para generar pdf incluir al final de la presentación lo siguiente: ?showNotes=separate-page&amp;print-pdf</p></div></aside></section></div></div><script src="reveal.js/lib/js/head.min.js"></script><script src="reveal.js/js/reveal.js"></script><script>Array.prototype.slice.call(document.querySelectorAll('.slides section')).forEach(function(slide) {
   if (slide.getAttribute('data-background-color')) return;
   // user needs to explicitly say he wants CSS color to override otherwise we might break custom css or theme (#226)
