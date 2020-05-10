@@ -25,11 +25,12 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script><!--[if 
 <div id="schauderhaft-footer" class="footer">
     <span class="element">UDE</span>
     <span class="element"></span>
-    <span class="element">Intro Test&amp;Clean</span>
+    <span class="element">Intro SOLID/Test/Clean</span>
 </div>
 <section id="_introducción_a_solid_unit_test_clean_architecture"><h2>Introducción a SOLID, Unit Test &amp; Clean Architecture</h2></section>
-<section id="_principios_solid"><h2>Principios SOLID</h2><div class="ulist"><ul><li><p>Single responsibility</p></li><li><p>Open closed</p></li><li><p>Liskov substitution</p></li><li><p>Interface segregation</p></li><li><p>Dependency injection</p></li></ul></div></section>
-<section id="_principio_de_responsabilidad_única"><h2>Principio de Responsabilidad Única</h2><div class="paragraph"><p><strong>Un objeto debe realizar una única cosa</strong>.</p></div>
+<section id="_principios_solid"><h2>Principios SOLID</h2><div class="ulist"><ul><li><p>Single responsibility <span class="icon"><i class="fa fa-cube"></i></span></p></li><li><p>Open closed <span class="icon"><i class="fa fa-unlock"></i></span>/<span class="icon"><i class="fa fa-lock"></i></span></p></li><li><p>Liskov substitution <span class="icon"><i class="fa fa-users"></i></span></p></li><li><p>Interface segregation <span class="icon"><i class="fa fa-cut"></i></span></p></li><li><p>Dependency inversion <span class="icon"><i class="fa fa-cubes"></i></span></p></li></ul></div></section>
+<section id="_principio_de_responsabilidad_única"><h2>Principio de Responsabilidad Única <span class="icon"><i class="fa fa-cube"></i></span></h2><div class="paragraph"><p><strong>Un objeto debe realizar una única cosa</strong>.</p></div>
+<div class="paragraph"><p><strong>Un objeto debe tener una sola razón para cambiar.</strong></p></div>
 <aside class="notes"><div class="paragraph"><p>Es muy habitual, si no prestamos atención a esto, que acabemos
 teniendo clases que tienen varias responsabilidades lógicas a la vez.</p></div></aside></section>
 <section id="_cómo_detectar_si_estamos_violando_el_principio_de_responsabilidad_única"><h2>¿Cómo detectar si estamos violando el Principio de Responsabilidad Única?</h2></section>
@@ -44,7 +45,8 @@ teniendo clases que tienen varias responsabilidades lógicas a la vez.</p></div>
   fun print() {
     println(toString())
   }
-}</code></pre></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>Esta es una clase sencilla con datos y lógica de negocio.</p></div></aside></section>
 <section id="_qué_problema_tiene_esta_clase"><h2>¿Qué problema tiene esta clase?</h2></section>
 <section><div class="ulist"><ul><li><p>Mezcla de lógica con presentación</p></li></ul></div></section>
 <section id="_cómo_arreglarlo"><h2>¿Cómo arreglarlo?</h2></section>
@@ -52,8 +54,9 @@ teniendo clases que tienen varias responsabilidades lógicas a la vez.</p></div>
   fun print(vehicle:Vehicle) {
     println(vehicle)
   }
-}</code></pre></section>
-<section id="_principio_openclosed"><h2>Principio Open/Closed</h2><div class="paragraph"><p><strong>Una entidad de software debería estar abierta a extensión pero cerrada a modificación</strong>.</p></div></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>En este caso implementando un printer dedicado.</p></div></aside></section>
+<section id="_principio_openclosed"><h2>Principio Open/Closed <span class="icon"><i class="fa fa-unlock"></i></span>/<span class="icon"><i class="fa fa-lock"></i></span></h2><div class="paragraph"><p><strong>Una entidad de software debería estar abierta a extensión pero cerrada a modificación</strong>.</p></div></section>
 <section id="_cómo_detectar_que_estamos_violando_el_principio_openclosed"><h2>¿Cómo detectar que estamos violando el principio Open/Closed?</h2></section>
 <section><div class="ulist"><ul><li><p>Clases que modificamos más seguido (hits of code)</p></li></ul></div></section>
 <section id="_ejemplo_2"><h2>Ejemplo</h2></section>
@@ -71,7 +74,8 @@ fun draw(vehicle:Vehicle) {
       CAR -&gt; drawCar(vehicle)
       MOTORBIKE -&gt; drawMotorbike(vehicle)
     }
-}</code></pre></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>Siguiendo con el ejemplo del vehículo anterior, ahora con funcionalidad de dibujar <code>draw</code>. Al principio es sencilla la implementación y puede ser suficiente para la aplicación, pero se presenta que cada vez que se quiera dibujar un nuevo vehículo se debe actualizar el contenido del método, el enum y la lógica en la propia que clase que nos interesaría dibujar.</p></div></aside></section>
 <section id="_qué_podemos_hacer_para_evitar_tener_que_estar_modificando_el_método_draw"><h2>¿Qué podemos hacer para evitar tener que estar modificando el método <code>draw</code>?</h2></section>
 <section id="_polimorfismo"><h2>Polimorfismo</h2></section>
 <section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">abstract class Vehicle {
@@ -95,9 +99,10 @@ class Truck:Vehicle() {
   override fun draw() {
     // Draw the truck
   }
-}</code></pre></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>Al utilizar polimorfismo en este caso cada objeto que deseemos dibujar lo único que necesita es implementar la interfaz. Adicionalmente se simplifica el método draw original, pues en runtime invocará la implementación correspondiente, por lo que ya no necesitamos el enum para este caso.</p></div></aside></section>
 <section id="_cuándo_debemos_cumplir_con_este_principio"><h2>¿Cuándo debemos cumplir con este principio?</h2><div class="ulist"><ul><li><p>Depende, debe aplicarse cuando es necesario. La complejidad no siempre compensa.</p></li><li><p>Un caso práctico es cuando hay partes de nuestro código que cambien mucho.</p></li></ul></div></section>
-<section id="_principio_de_sustitución_de_liskov"><h2>Principio de Sustitución de Liskov</h2><div class="paragraph"><p><strong>Si en alguna parte de nuestro código estamos usando una clase, y esta clase es extendida, tenemos que poder utilizar cualquiera de las clases hijas y que el programa siga siendo válido.</strong></p></div></section>
+<section id="_principio_de_sustitución_de_liskov"><h2>Principio de Sustitución de Liskov <span class="icon"><i class="fa fa-users"></i></span></h2><div class="paragraph"><p><strong>Si en alguna parte de nuestro código estamos usando una clase, y esta clase es extendida, tenemos que poder utilizar cualquiera de las clases hijas y que el programa siga siendo válido.</strong></p></div></section>
 <section id="_cómo_detectar_que_estamos_violando_el_principio_de_sustitución_de_liskov"><h2>¿Cómo detectar que estamos violando el principio de sustitución de Liskov?</h2><div class="ulist"><ul><li><p>Si un método sobrescrito no hace nada o lanza una excepción.</p></li></ul></div></section>
 <section id="_ejemplo_3"><h2>Ejemplo</h2></section>
 <section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">open class Rectangle {
@@ -116,7 +121,8 @@ fun givenRectangle_whenCalculateArea_thenCorrectResult() {
   val result = r.calculateArea()
 
   assertEquals(20, result)
-}</code></pre></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>En este caso tenemos un rectángulo común y un test para probar el cálculo del área.</p></div></aside></section>
 <section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">class Square:Rectangle() {
   override var width:Int
   get() {
@@ -134,18 +140,19 @@ fun givenRectangle_whenCalculateArea_thenCorrectResult() {
     super.height = height
     super.width = height
   }
-}</code></pre></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>La pudiéramos extender para soportar por ejemplo un cuadrado.</p></div></aside></section>
 <section id="_qué_pasará_si_en_el_test_cambiamos_el_rectángulo_por_un_cuadrado"><h2>¿Qué pasará si en el test cambiamos el rectángulo por un cuadrado?</h2></section>
-<section id="_1620"><h2>16!=20</h2></section>
+<section id="_1620"><h2>16!=20</h2><aside class="notes"><div class="paragraph"><p>El test falla porque cada vez que cambiamos un lado afectamos el otro.</p></div></aside></section>
 <section id="_qué_podemos_hacer"><h2>¿Qué podemos hacer?</h2><div class="ulist"><ul><li><p>Usar interfaces, normalmente pequeñas.</p></li><li><p>Inmutabilidad (Una vez que se ha creado un objeto, el estado del mismo no puede volver a modificarse)</p></li></ul></div></section>
 <section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">interface IRectangle {
   fun calculateArea():Int
 }
 class Rectangle:IRectangle//…
 class Square:IRectangle//…</code></pre></section>
-<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">class Rectangle(private val width:Int, private val height:Int)
+<section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">open class Rectangle(private val width:Int, private val height:Int)
 class Square(private val side:Int):Rectangle(side, side)</code></pre></section>
-<section id="_principio_de_segregación_de_interfaces"><h2>Principio de segregación de interfaces</h2><div class="paragraph"><p><strong>Ninguna clase debería depender de métodos que no usa.</strong></p></div></section>
+<section id="_principio_de_segregación_de_interfaces"><h2>Principio de segregación de interfaces <span class="icon"><i class="fa fa-cut"></i></span></h2><div class="paragraph"><p><strong>Ninguna clase debería depender de métodos que no usa.</strong></p></div></section>
 <section id="_cómo_detectar_que_estamos_violando_el_principio_de_segregación_de_interfaces"><h2>¿Cómo detectar que estamos violando el Principio de segregación de interfaces?</h2><div class="ulist"><ul><li><p>Al implementar una interfaz ves que uno o varios de los métodos no tienen sentido y te hace falta dejarlos vacíos o
 lanzar excepciones</p></li></ul></div></section>
 <section id="_ejemplo_4"><h2>Ejemplo</h2><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">interface Product {
@@ -154,7 +161,8 @@ lanzar excepciones</p></li></ul></div></section>
   fun numberOfDisks():Int
   fun releaseDate():Date
 }
-class CD:Product//…</code></pre></section>
+class CD:Product//…</code></pre>
+<aside class="notes"><div class="paragraph"><p>Imaginemos que una tienda que vende CD musicales el sistema de datos esta modelado con esa interfaz.</p></div></aside></section>
 <section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">interface Product {
   //…
   fun recommendedAge():Int
@@ -164,7 +172,8 @@ class CD:Product {
   override fun recommendedAge():Int {
     throw UnsupportedOperationException()
   }
-}</code></pre></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>Pero si ahora deseamos vender DVD y queremos limitar la edad por ejemplo.</p></div></aside></section>
 <section id="_qué_podemos_hacer_2"><h2>¿Qué podemos hacer?</h2></section>
 <section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">interface AgeAware {
   fun recommendedAge():Int
@@ -175,9 +184,10 @@ class DVD:Product, AgeAware {
     return user.age &gt;= ageAware.recommendedAge()
   }
   //…
-}</code></pre></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>En este caso ahora tenemos una interfaz más chica <code>AgeAware</code>, con responsabilidades acotadas y no afecta a la clase <code>CD</code>.</p></div></aside></section>
 <section id="_qué_hacer_con_código_antiguo"><h2>¿Qué hacer con código antiguo?</h2><div class="ulist"><ul><li><p>Usar el patrón adapter</p></li></ul></div></section>
-<section id="_principio_de_inversión_de_dependencias"><h2>Principio de inversión de dependencias</h2><div class="ulist"><ul><li><p><strong>Las clases de alto nivel no deberían depender de las clases de bajo nivel</strong>. Ambas deberían depender de las abstracciones.</p></li><li><p><strong>Las abstracciones no deberían depender de los detalles</strong>. Los detalles deberían depender de las abstracciones.</p></li></ul></div></section>
+<section id="_principio_de_inversión_de_dependencias"><h2>Principio de inversión de dependencias <span class="icon"><i class="fa fa-cubes"></i></span></h2><div class="ulist"><ul><li><p><strong>Las clases de alto nivel no deberían depender de las clases de bajo nivel</strong>. Ambas deberían depender de las abstracciones.</p></li><li><p><strong>Las abstracciones no deberían depender de los detalles</strong>. Los detalles deberían depender de las abstracciones.</p></li></ul></div></section>
 <section id="_cómo_detectar_que_estamos_violando_el_principio_de_inversión_de_dependencias"><h2>¿Cómo detectar que estamos violando el Principio de inversión de dependencias?</h2><div class="ulist"><ul><li><p>Cualquier instanciación de clases complejas o módulos es una
 violación de este principio.</p></li></ul></div></section>
 <section id="_ejemplo_5"><h2>Ejemplo</h2></section>
@@ -198,7 +208,8 @@ class CreditCard {
   fun pay(shopping:Shopping) {
     // Performs payment using a credit card
   }
-}</code></pre></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>En este ejemplo tenemos la clase <code>ShoppingBasket</code> que persiste y envía el pago por tarjeta de crédito. El problema que tiene es que primero depende de clases concretas en vez de abstracciones y segundo estás dependencias son creadas dentro de la propia clase.</p></div></aside></section>
 <section id="_cómo_lo_solucionamos"><h2>¿Cómo lo solucionamos?</h2><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">interface Persistence {
   fun save(shopping:Shopping)
 }
@@ -214,7 +225,8 @@ class CreditCard:PaymentMethod {
   override fun pay(shopping:Shopping) {
     // Performs payment using a credit card
   }
-}</code></pre></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>Una manera de arreglarlo es crear interfaces dedicadas para las dependencias.</p></div></aside></section>
 <section id="_ahora_inyectamos_las_dependencias"><h2>Ahora inyectamos las dependencias</h2></section>
 <section><pre class="highlight listingblock"><code data-noescape class="kotlin language-kotlin">class ShoppingBasket(private val persistence:Persistence, private val paymentMethod:PaymentMethod) {
   fun buy(shopping:Shopping) {
@@ -231,8 +243,9 @@ class Paypal:PaymentMethod {
   override fun pay(shopping:Shopping) {
     // Performs payment using Paypal account
   }
-}</code></pre></section>
-<section id="_testing"><h2>Testing</h2></section>
+}</code></pre>
+<aside class="notes"><div class="paragraph"><p>Y ahora les pasamos las dependencias al constructor de la clase, esto nos da la flexibilidad de cambiar la implementación sin necesidad de actualizar la clase. Otra ventaja es que al tener las dependencias en el constructor se nos da una vista previa de las responsabilidades que esta clase maneja, pudiendo detectar rápidamente en caso que empiece a crecer la violación del principio de responsabilidad única.</p></div></aside></section>
+<section id="_testing"><h2>Testing <span class="icon"><i class="fa fa-shield"></i></span></h2></section>
 <section id="_por_qué_escribimos_tests"><h2>¿Por qué escribimos tests? <span class="icon"><i class="fa fa-lightbulb"></i></span></h2></section>
 <section id="_por_qué_escribimos_tests_2"><h2>¿Por qué escribimos tests?</h2><div class="ulist"><ul><li><p>Para asegurarnos que el código funciona</p></li><li><p>&#8230;&#8203; pero escribir test automatizados es mucho más trabajo que simplemente escribir el <code>main</code> y validar entradas y salidas &#8230;&#8203;</p></li></ul></div></section>
 <section id="_el_software_cambia"><h2>El software cambia <span class="icon"><i class="fa fa-code"></i></span></h2><div class="ulist"><ul><li><p>Si el software cambia, los test deben cambiar con él</p></li><li><p>Si cambiamos la estructura de nuestras clases, tenemos que adaptar los test, perder tiempo</p></li><li><p>Si añadimos nuevas funcionalidades obviamente no vamos a tener tests</p></li><li><p>Si arreglamos <span class="icon"><i class="fa fa-bug"></i></span>, al principio no vamos a tener test</p></li></ul></div></section>

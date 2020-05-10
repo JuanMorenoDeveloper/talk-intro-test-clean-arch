@@ -1,7 +1,7 @@
 :icons: font
 :twitter-tag: UDE
 :conference-tag:
-:talk-tag: Intro Test&Clean
+:talk-tag: Intro SOLID/Test/Clean
 :linkattrs:
 ifndef::partials[:partials: partials]
 
@@ -13,15 +13,18 @@ include::{partials}/footer.ad[]
 //image::pattern-design-4pwbdv1y.jpg[background, size=auto]
 // Fuente: https://standaserigraf.wordpress.com/2015/09/30/pattern-design-tecnica-artistica-que-se-ocupa-de-la-creacion-de-patrones-graficos/
 == Principios SOLID
-* Single responsibility
-* Open closed
-* Liskov substitution
-* Interface segregation
-* Dependency injection
+* Single responsibility icon:cube[]
+* Open closed icon:unlock[]/icon:lock[]
+* Liskov substitution icon:users[]
+* Interface segregation icon:cut[]
+* Dependency inversion icon:cubes[]
 
-== Principio de Responsabilidad Única
+== Principio de Responsabilidad Única icon:cube[]
 
 *Un objeto debe realizar una única cosa*.
+
+*Un objeto debe tener una sola razón para cambiar.*
+
 
 [NOTE.speaker]
 ====
@@ -58,7 +61,10 @@ class Vehicle {
   }
 }
 ----
-
+[NOTE.speaker]
+====
+Esta es una clase sencilla con datos y lógica de negocio.
+====
 == ¿Qué problema tiene esta clase?
 
 == !
@@ -76,8 +82,12 @@ class VehiclePrinter {
   }
 }
 ----
+[NOTE.speaker]
+====
+En este caso implementando un printer dedicado.
+====
 
-== Principio Open/Closed
+== Principio Open/Closed icon:unlock[]/icon:lock[]
 
 *Una entidad de software debería estar abierta a extensión pero cerrada a modificación*.
 
@@ -108,6 +118,10 @@ fun draw(vehicle:Vehicle) {
     }
 }
 ----
+[NOTE.speaker]
+====
+Siguiendo con el ejemplo del vehículo anterior, ahora con funcionalidad de dibujar `draw`. Al principio es sencilla la implementación y puede ser suficiente para la aplicación, pero se presenta que cada vez que se quiera dibujar un nuevo vehículo se debe actualizar el contenido del método, el enum y la lógica en la propia que clase que nos interesaría dibujar.
+====
 
 == ¿Qué podemos hacer para evitar tener que estar modificando el método `draw`?
 
@@ -144,13 +158,17 @@ class Truck:Vehicle() {
   }
 }
 ----
+[NOTE.speaker]
+====
+Al utilizar polimorfismo en este caso cada objeto que deseemos dibujar lo único que necesita es implementar la interfaz. Adicionalmente se simplifica el método draw original, pues en runtime invocará la implementación correspondiente, por lo que ya no necesitamos el enum para este caso.
+====
 
 == ¿Cuándo debemos cumplir con este principio?
 
 * Depende, debe aplicarse cuando es necesario. La complejidad no siempre compensa.
 * Un caso práctico es cuando hay partes de nuestro código que cambien mucho.
 
-== Principio de Sustitución de Liskov
+== Principio de Sustitución de Liskov icon:users[]
 
 *Si en alguna parte de nuestro código estamos usando una clase, y esta clase es extendida, tenemos que poder utilizar cualquiera de las clases hijas y que el programa siga siendo válido.*
 
@@ -180,6 +198,10 @@ fun givenRectangle_whenCalculateArea_thenCorrectResult() {
   assertEquals(20, result)
 }
 ----
+[NOTE.speaker]
+====
+En este caso tenemos un rectángulo común y un test para probar el cálculo del área.
+====
 
 == !
 [source,kotlin]
@@ -203,10 +225,19 @@ class Square:Rectangle() {
   }
 }
 ----
+[NOTE.speaker]
+====
+La pudiéramos extender para soportar por ejemplo un cuadrado.
+====
 
 == ¿Qué pasará si en el test cambiamos el rectángulo por un cuadrado?
 
 == 16!=20
+[NOTE.speaker]
+====
+El test falla porque cada vez que cambiamos un lado afectamos el otro.
+
+====
 
 == ¿Qué podemos hacer?
 * Usar interfaces, normalmente pequeñas.
@@ -225,11 +256,11 @@ class Square:IRectangle//…
 == !
 [source,kotlin]
 ----
-class Rectangle(private val width:Int, private val height:Int)
+open class Rectangle(private val width:Int, private val height:Int)
 class Square(private val side:Int):Rectangle(side, side)
 ----
 
-== Principio de segregación de interfaces
+== Principio de segregación de interfaces icon:cut[]
 
 *Ninguna clase debería depender de métodos que no usa.*
 
@@ -249,6 +280,10 @@ interface Product {
 }
 class CD:Product//…
 ----
+[NOTE.speaker]
+====
+Imaginemos que una tienda que vende CD musicales el sistema de datos esta modelado con esa interfaz.
+====
 
 == !
 [source,kotlin]
@@ -264,6 +299,11 @@ class CD:Product {
   }
 }
 ----
+[NOTE.speaker]
+====
+Pero si ahora deseamos vender DVD y queremos limitar la edad por ejemplo.
+
+====
 
 == ¿Qué podemos hacer?
 
@@ -281,11 +321,15 @@ class DVD:Product, AgeAware {
   //…
 }
 ----
+[NOTE.speaker]
+====
+En este caso ahora tenemos una interfaz más chica `AgeAware`, con responsabilidades acotadas y no afecta a la clase `CD`.
+====
 
 == ¿Qué hacer con código antiguo?
 * Usar el patrón adapter
 
-== Principio de inversión de dependencias
+== Principio de inversión de dependencias icon:cubes[]
 
 * *Las clases de alto nivel no deberían depender de las clases de bajo nivel*. Ambas deberían depender de las abstracciones.
 * *Las abstracciones no deberían depender de los detalles*. Los detalles deberían depender de las abstracciones.
@@ -318,6 +362,10 @@ class CreditCard {
   }
 }
 ----
+[NOTE.speaker]
+====
+En este ejemplo tenemos la clase `ShoppingBasket` que persiste y envía el pago por tarjeta de crédito. El problema que tiene es que primero depende de clases concretas en vez de abstracciones y segundo estás dependencias son creadas dentro de la propia clase.
+====
 
 == ¿Cómo lo solucionamos?
 [source,kotlin]
@@ -339,6 +387,10 @@ class CreditCard:PaymentMethod {
   }
 }
 ----
+[NOTE.speaker]
+====
+Una manera de arreglarlo es crear interfaces dedicadas para las dependencias.
+====
 
 == Ahora inyectamos las dependencias
 
@@ -362,8 +414,12 @@ class Paypal:PaymentMethod {
   }
 }
 ----
+[NOTE.speaker]
+====
+Y ahora les pasamos las dependencias al constructor de la clase, esto nos da la flexibilidad de cambiar la implementación sin necesidad de actualizar la clase. Otra ventaja es que al tener las dependencias en el constructor se nos da una vista previa de las responsabilidades que esta clase maneja, pudiendo detectar rápidamente en caso que empiece a crecer la violación del principio de responsabilidad única.
+====
 
-== Testing
+== Testing icon:shield[]
 
 == ¿Por qué escribimos tests? icon:lightbulb[]
 
