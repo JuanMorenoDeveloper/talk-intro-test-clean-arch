@@ -23,7 +23,7 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script><!--[if 
     } );
 </script>
 <div id="schauderhaft-footer" class="footer">
-    <span class="element">UDE</span>
+    <span class="element"></span>
     <span class="element"></span>
     <span class="element">Intro SOLID/Test/Clean</span>
 </div>
@@ -323,7 +323,85 @@ necesario configurar qué comportamiento esperas cuando alguien llame a alguno d
 <section id="_red_green_refactor_steps"><h2>Red-Green-Refactor steps</h2><div class="olist arabic"><ol class="arabic"><li><p>Agregar un test (Entiendo el propósito de la funcionalidad)</p></li><li><p>Ejecutar todos los test y ver si el nuevo test <span class="red">falla</span> (Debería fallar por las razones conocidas)</p></li><li><p>Escribir el mínimo código para que <span class="green">pase</span> el test</p></li><li><p>Ejecutar nuevamente el test (Valida el punto anterior)</p></li><li><p><span class="blue">Refactorizar</span> el código (Se optimiza) <strong>…​Repetir el proceso</strong></p></li></ol></div></section>
 <section id="_beneficios_tdd"><h2>Beneficios TDD</h2><div class="ulist"><ul><li><p>Código con pruebas. No se pueden agregar nuevas funcionalidades sin test.</p></li><li><p>Ciclo de desarrollo rápido y seguro.</p></li><li><p>Confianza en el código y los tests.</p></li></ul></div></section>
 <section id="_algunas_librerías_java_para_test"><h2>Algunas Librerías Java para test</h2><div class="ulist"><ul><li><p><a href="{https://junit.org/junit5/}">JUnit</a></p></li><li><p><a href="{https://site.mockito.org/}">Mockito</a></p></li><li><p><a href="{http://joel-costigliola.github.io/assertj/}">AssertJ</a></p></li><li><p><a href="{https://cucumber.io/}">Cucumber</a></p></li></ul></div></section>
-<section id="_algunas_librerías_android_para_test"><h2>Algunas Librerías Android para test</h2><div class="ulist"><ul><li><p><a href="{http://robolectric.org/}">Robolectric</a></p></li><li><p><a href="{https://developer.android.com/training/testing/espresso}">Espresso</a></p></li></ul></div></section>
+<section id="_algunas_librerías_php_para_test"><h2>Algunas Librerías PHP para test</h2><div class="ulist"><ul><li><p><a href="{https://phpunit.de/}">PHPUnit</a></p></li></ul></div></section>
+<section id="_algunas_librerías_js_para_test"><h2>Algunas Librerías JS para test</h2><div class="ulist"><ul><li><p><a href="{https://mochajs.org/}">MochaJS</a></p></li><li><p><a href="{https://jestjs.io/}">Jest</a></p></li></ul></div></section>
+<section id="_phpunit"><h2>PHPUnit</h2></section>
+<section id="_dependencias"><h2>Dependencias</h2><pre class="highlight listingblock"><code data-noescape class="json language-json">{
+    "autoload": {
+        "classmap": [
+            "src/"
+        ]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    }
+}</code></pre></section>
+<section id="_ejemplo_validando_un_email"><h2>Ejemplo: Validando un Email</h2><pre class="highlight listingblock"><code data-noescape class="php language-php">&lt;?php declare(strict_types=1);
+final class Email
+{
+    private $email;
+
+    private function __construct(string $email)
+    {
+        $this-&gt;ensureIsValidEmail($email);
+
+        $this-&gt;email = $email;
+    }
+
+    public static function fromString(string $email): self
+    {
+        return new self($email);
+    }
+
+    public function __toString(): string
+    {
+        return $this-&gt;email;
+    }
+
+    private function ensureIsValidEmail(string $email): void
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    '"%s" is not a valid email address',
+                    $email
+                )
+            );
+        }
+    }
+}</code></pre></section>
+<section id="_test_con_phpunit"><h2>Test con PHPUnit</h2><pre class="highlight listingblock"><code data-noescape class="php language-php">&lt;?php declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+
+final class EmailTest extends TestCase
+{
+    public function testCanBeCreatedFromValidEmailAddress(): void
+    {
+        $this-&gt;assertInstanceOf(
+            Email::class,
+            Email::fromString('user@example.com')
+        );
+    }
+
+    public function testCannotBeCreatedFromInvalidEmailAddress(): void
+    {
+        $this-&gt;expectException(InvalidArgumentException::class);
+
+        Email::fromString('invalid');
+    }
+
+    public function testCanBeUsedAsString(): void
+    {
+        $this-&gt;assertEquals(
+            'user@example.com',
+            Email::fromString('user@example.com')
+        );
+    }
+}</code></pre></section>
+<section id="_cobertura_con_phpunit"><h2>Cobertura con PHPUnit</h2><div class="ulist"><ul><li><p>Requiere coverage driver: <a href="https://xdebug.org/">Xdebug</a> o <a href="https://github.com/krakjoe/pcov">PCOV</a>.</p></li><li><p>Soporta múltiples formatos</p></li></ul></div>
+<pre class="highlight listingblock"><code data-noescape>  --coverage-php &lt;file&gt;       Export PHP_CodeCoverage object to file
+[source,bash]</code></pre></section>
+<section id="_ejemplo_6"><h2>Ejemplo</h2><pre class="highlight listingblock"><code data-noescape class="bash language-bash"> /usr/bin/php /home/juan/Dev/blog/vendor/phpunit/phpunit/phpunit --configuration /home/juan/Dev/blog/phpunit.xml --coverage-html out</code></pre></section>
 <section id="_arquitectura_clean"><h2>Arquitectura Clean</h2></section>
 <section id="_qué_es_arquitectura_de_software"><h2>¿Qué es arquitectura de software?</h2><div class="ulist"><ul><li><p>Estructura de un Sistema compuesta de elementos [1] con propiedades visibles de forma externa y las relaciones que existen entre ellos. <strong>Software Engineering Institute,SEI</strong>.</p></li></ul></div>
 <div class="paragraph"><p>[1] Definición abstracta: objetos, hilos, clases, componentes&#8230;&#8203;</p></div></section>

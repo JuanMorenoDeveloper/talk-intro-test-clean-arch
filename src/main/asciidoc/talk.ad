@@ -1,5 +1,5 @@
 :icons: font
-:twitter-tag: UDE
+:twitter-tag:
 :conference-tag:
 :talk-tag: Intro SOLID/Test/Clean
 :linkattrs:
@@ -700,9 +700,119 @@ image::tdd-cycle.jpg[]
 * link:{http://joel-costigliola.github.io/assertj/}[AssertJ]
 * link:{https://cucumber.io/}[Cucumber]
 
-== Algunas Librerías Android para test
-* link:{http://robolectric.org/}[Robolectric]
-* link:{https://developer.android.com/training/testing/espresso}[Espresso]
+== Algunas Librerías PHP para test
+* link:{https://phpunit.de/}[PHPUnit]
+
+== Algunas Librerías JS para test
+* link:{https://mochajs.org/}[MochaJS]
+* link:{https://jestjs.io/}[Jest]
+
+== PHPUnit
+
+== Dependencias
+[source, json]
+----
+{
+    "autoload": {
+        "classmap": [
+            "src/"
+        ]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    }
+}
+----
+
+== Ejemplo: Validando un Email
+[source, php]
+----
+<?php declare(strict_types=1);
+final class Email
+{
+    private $email;
+
+    private function __construct(string $email)
+    {
+        $this->ensureIsValidEmail($email);
+
+        $this->email = $email;
+    }
+
+    public static function fromString(string $email): self
+    {
+        return new self($email);
+    }
+
+    public function __toString(): string
+    {
+        return $this->email;
+    }
+
+    private function ensureIsValidEmail(string $email): void
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    '"%s" is not a valid email address',
+                    $email
+                )
+            );
+        }
+    }
+}
+----
+
+== Test con PHPUnit
+[source,php]
+----
+<?php declare(strict_types=1);
+use PHPUnit\Framework\TestCase;
+
+final class EmailTest extends TestCase
+{
+    public function testCanBeCreatedFromValidEmailAddress(): void
+    {
+        $this->assertInstanceOf(
+            Email::class,
+            Email::fromString('user@example.com')
+        );
+    }
+
+    public function testCannotBeCreatedFromInvalidEmailAddress(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        Email::fromString('invalid');
+    }
+
+    public function testCanBeUsedAsString(): void
+    {
+        $this->assertEquals(
+            'user@example.com',
+            Email::fromString('user@example.com')
+        );
+    }
+}
+----
+
+== Cobertura con PHPUnit
+
+* Requiere coverage driver: https://xdebug.org/[Xdebug] o https://github.com/krakjoe/pcov[PCOV].
+
+* Soporta múltiples formatos
+[source,bash]
+----
+  --coverage-php <file>       Export PHP_CodeCoverage object to file
+[source,bash]
+----
+
+== Ejemplo
+[source,bash]
+----
+ /usr/bin/php /home/juan/Dev/blog/vendor/phpunit/phpunit/phpunit --configuration /home/juan/Dev/blog/phpunit.xml --coverage-html out
+----
+
 
 == Arquitectura Clean
 
