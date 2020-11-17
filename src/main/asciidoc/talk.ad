@@ -796,6 +796,40 @@ final class EmailTest extends TestCase
 }
 ----
 
+== PHPUnit test doubles - Stubs
+[source,php]
+----
+public function testStub(): void
+{
+    // Create a stub for the SomeClass class.
+    $stub = $this->createStub(SomeClass::class);
+
+    // Configure the stub.
+    $stub->method('doSomething')
+        ->willReturn('foo');
+
+    // Calling $stub->doSomething() will now return
+    // 'foo'.
+    $this->assertSame('foo', $stub->doSomething());
+}
+----
+
+
+== PHPUnit test doubles - Mocks
+[source,php]
+----
+public function testObserversAreUpdated(): void
+{
+    $observer = $this->createMock(Observer::class); //<1>
+    $observer->expects($this->once())
+        ->method('update')
+        ->with($this->equalTo('something')); //<2>
+    $subject = new Subject('My subject');
+    $subject->attach($observer);
+    $subject->doSomething();
+}
+----
+
 == Cobertura con PHPUnit
 
 * Requiere coverage driver: https://xdebug.org/[Xdebug] o https://github.com/krakjoe/pcov[PCOV].
@@ -813,6 +847,9 @@ final class EmailTest extends TestCase
  /usr/bin/php /home/juan/Dev/blog/vendor/phpunit/phpunit/phpunit --configuration /home/juan/Dev/blog/phpunit.xml --coverage-html out
 ----
 
+== Reporte
+
+image::coverage.png[background, size=auto]
 
 == Arquitectura Clean
 

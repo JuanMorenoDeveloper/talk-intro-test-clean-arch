@@ -398,10 +398,34 @@ final class EmailTest extends TestCase
         );
     }
 }</code></pre></section>
+<section id="_phpunit_test_doubles_stubs"><h2>PHPUnit test doubles - Stubs</h2><pre class="highlight listingblock"><code data-noescape class="php language-php">public function testStub(): void
+{
+    // Create a stub for the SomeClass class.
+    $stub = $this-&gt;createStub(SomeClass::class);
+
+    // Configure the stub.
+    $stub-&gt;method('doSomething')
+        -&gt;willReturn('foo');
+
+    // Calling $stub-&gt;doSomething() will now return
+    // 'foo'.
+    $this-&gt;assertSame('foo', $stub-&gt;doSomething());
+}</code></pre></section>
+<section id="_phpunit_test_doubles_mocks"><h2>PHPUnit test doubles - Mocks</h2><pre class="highlight listingblock"><code data-noescape class="php language-php">public function testObserversAreUpdated(): void
+{
+    $observer = $this-&gt;createMock(Observer::class); <i class="conum" data-value="1"></i><b>(1)</b>
+    $observer-&gt;expects($this-&gt;once())
+        -&gt;method('update')
+        -&gt;with($this-&gt;equalTo('something')); <i class="conum" data-value="2"></i><b>(2)</b>
+    $subject = new Subject('My subject');
+    $subject-&gt;attach($observer);
+    $subject-&gt;doSomething();
+}</code></pre></section>
 <section id="_cobertura_con_phpunit"><h2>Cobertura con PHPUnit</h2><div class="ulist"><ul><li><p>Requiere coverage driver: <a href="https://xdebug.org/">Xdebug</a> o <a href="https://github.com/krakjoe/pcov">PCOV</a>.</p></li><li><p>Soporta múltiples formatos</p></li></ul></div>
 <pre class="highlight listingblock"><code data-noescape>  --coverage-php &lt;file&gt;       Export PHP_CodeCoverage object to file
 [source,bash]</code></pre></section>
 <section id="_ejemplo_6"><h2>Ejemplo</h2><pre class="highlight listingblock"><code data-noescape class="bash language-bash"> /usr/bin/php /home/juan/Dev/blog/vendor/phpunit/phpunit/phpunit --configuration /home/juan/Dev/blog/phpunit.xml --coverage-html out</code></pre></section>
+<section id="_reporte" data-background-image="./images/coverage.png" data-background-size="auto"><h2>Reporte</h2></section>
 <section id="_arquitectura_clean"><h2>Arquitectura Clean</h2></section>
 <section id="_qué_es_arquitectura_de_software"><h2>¿Qué es arquitectura de software?</h2><div class="ulist"><ul><li><p>Estructura de un Sistema compuesta de elementos [1] con propiedades visibles de forma externa y las relaciones que existen entre ellos. <strong>Software Engineering Institute,SEI</strong>.</p></li></ul></div>
 <div class="paragraph"><p>[1] Definición abstracta: objetos, hilos, clases, componentes&#8230;&#8203;</p></div></section>
